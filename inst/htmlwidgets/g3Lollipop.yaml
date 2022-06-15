@@ -6,5 +6,5 @@ dependencies:
   - name: g3viz
     version: 0.4.0
     src: htmlwidgets/lib
-    script: ./g3viz/g3-lollipop.min.js
+    script: ./g3viz/g3-lollipop.js
     style: ./g3viz/g3-lollipop.min.css

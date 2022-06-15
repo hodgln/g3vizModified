@@ -1,6 +1,7 @@
-Package: g3viz
+Package: g3vizModified
 Type: Package
-Title: Interactively Visualize Genetic Mutation Data using a Lollipop-Diagram
+Title: Interactively Visualize Genetic Mutation Data using a
+        Lollipop-Diagram
 Version: 1.1.3
 Authors@R: c(
     person("Xin", "Guo", email = "g3viz.group@gmail.com", role = c("aut", "cre"))
@@ -11,19 +12,13 @@ Description: R interface for 'g3-lollipop' JavaScript library.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends:
-    R (>= 3.0.0)
-Imports:
-    jsonlite,
-    cgdsr,
-    stringr,
-    htmlwidgets
-Suggests:
-    shiny (>= 1.0.0),
-    knitr,
-    rmarkdown,
-    kableExtra
-URL: https://github.com/G3viz/g3viz
+Depends: R (>= 3.5.0)
+Imports: jsonlite, cgdsr, stringr, htmlwidgets
+Suggests: shiny (>= 1.0.0), knitr, rmarkdown, kableExtra
+URL: https://github.com/hodgln/g3vizModified
 BugReports: https://github.com/G3viz/g3viz/issues
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2022-04-04 12:51:00 UTC; danhodgin
+Author: Xin Guo [aut, cre]

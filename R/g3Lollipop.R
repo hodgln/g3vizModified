@@ -13,6 +13,13 @@
 #'   \emph{Hugo_Symbol}.
 #' @param aa.pos.col Column name of the parsed amino-acid change position.
 #'   Default \emph{AA_Position}.
+#' @param transcript.values Transcript values data frame.
+#'   Default \emph{start, stop, end, type, name}.
+#' @param start.pos.col Column name of the start position.
+#'   Default \emph{Start_Position}.
+#' @param gene.pos.values Start and stop positions in base pairs of the selected gene.
+#'   Default \emph{(start, stop)}.
+#' @param chr.value chromsome number of the selected gene, needed to filter variants in promoter regions.
 #' @param protein.change.col Column name of protein change information (e.g.,
 #'   p.K960R, G658S, L14Sfs*15). Default is a list of \emph{Protein_Change},
 #'   \emph{HGVSp_Short}.
@@ -57,6 +64,16 @@ g3Lollipop <- function(mutation.dat,
                        gene.symbol.col = "Hugo_Symbol",
                        # x-axis
                        aa.pos.col = "AA_Position",
+                       # alternate x-axis 
+                       start.pos.col = "Start_Position",
+                       # chromosome number
+                       chr.col = "Chromosome",
+                       # gene start and stop position values. 
+                       gene.pos.values,
+                       # transcription values data frame. 
+                       transcript.values,
+                       # chromosome number of selected gene.
+                       chr.value,
                        # y-axis, detailed information, required for tooltip information
                        protein.change.col = c("Protein_Change", "HGVSp_Short"),
                        # legend factor
@@ -96,6 +113,8 @@ g3Lollipop <- function(mutation.dat,
     stop("Some columns are missing in mutation data: ", paste(missing.columns, collapse = ", "))
   }
 
+
+
   # =======================================
   # version 1.2.0
   # (1) custom domain information
@@ -103,30 +122,54 @@ g3Lollipop <- function(mutation.dat,
   # (2) custom domain information format
   #     Require
   # get protein domain information
-  domain.data.json <- hgnc2pfam(hgnc.symbol = gene.symbol,
-                                uniprot.id = uniprot.id)
+  #domain.data.json <- hgnc2pfam(hgnc.symbol = gene.symbol,
+   #                             uniprot.id = uniprot.id)
+
+  domain.data.json <- toJSON(transcript.values, pretty = FALSE, auto_unbox = TRUE)
 
   # domain data format
-  domain.data.format <- list(
-    length = "length",
-    domainType = "pfam",
-    details = list(
-      start = "start",
-      end = "end",
-      name = "hmm.name"
-    )
+  # domain.data.format <- list(
+  #   length = "length",
+  #   domainType = "pfam",
+  #   details = list(
+  #     start = "start",
+  #     end = "end",
+  #     name = "hmm.name"
+  #   )
+  # )
+
+domain.data.format <- list(
+    name = "name",
+    type = "type",
+    start = "start",
+    end = "end"
   )
+
   domain.data.format.json <- toJSON(domain.data.format, pretty = FALSE, auto_unbox = TRUE)
   # =======================================
 
-  # get mutation data for the given gene
-  snv.data.df <- mutation.dat[mutation.dat[, gene.symbol.col] == gene.symbol
-                              & !is.na(mutation.dat[, aa.pos.col]), ]
-  snv.data.json <- toJSON(snv.data.df, pretty = FALSE, auto_unbox = TRUE)
+  # below may govern what data is picked up - somehow change this to a range encapsulating the gene
+  # subset(Mydata, x >= 3 & x <= 7) subset(Mydata, x %in% 3:7)
+
+  # filter for chr data, then for between positions. 
+
+  # get mutation data for the given gene - use chr.value here
+  #snv.data.df <- mutation.dat[mutation.dat[, gene.symbol.col] == gene.symbol
+  #                            & !is.na(mutation.dat[, start.pos.col]), ]
+
+  snv.chr.data <- mutation.dat[mutation.dat[, chr.col] == chr.value
+                              & !is.na(mutation.dat[, start.pos.col]), ]
+
+  snv.start.data <- snv.chr.data[snv.chr.data[, start.pos.col] > gene.pos.values[1], ]
+
+  snv.data.final <- snv.start.data[snv.start.data[, start.pos.col] < gene.pos.values[2], ]
+
+  snv.data.json <- toJSON(snv.data.final, pretty = FALSE, auto_unbox = TRUE)
+
 
   # read in data
   snv.data.format <- list(
-    x = aa.pos.col,
+    x = start.pos.col,
     y = protein.change.col,
     factor = factor.col
   )
@@ -135,11 +178,17 @@ g3Lollipop <- function(mutation.dat,
 
   plot.options.json <- toJSON(plot.options, pretty = FALSE, auto_unbox = TRUE)
 
+  gene.pos.json <- toJSON(gene.pos.values, pretty = FALSE, auto_unbox = TRUE)
+
+  
+
   x <- list(
     domainData = domain.data.json,
     domainDataFormat = domain.data.format.json,
     snvData = snv.data.json,
     snvDataFormat = snv.data.format.json,
+    genePosition = gene.pos.json,
+    geneSymbol = gene.symbol,
     plotSettings = plot.options.json,
     pngButton = save.png.btn,
     svgButton = save.svg.btn,
@@ -150,7 +199,7 @@ g3Lollipop <- function(mutation.dat,
   htmlwidgets::createWidget(
     name = "g3Lollipop",
     x,
-    package = "g3viz"
+    package = "g3vizModified"
   )
 
 #  plot.settings.json
@@ -176,7 +225,7 @@ g3Lollipop <- function(mutation.dat,
 #'
 #' @export
 g3LollipopOutput <- function(outputId, width = '100%', height = '520px'){
-  shinyWidgetOutput(outputId, 'g3Lollipop', width, height, package = 'g3viz')
+  shinyWidgetOutput(outputId, 'g3Lollipop', width, height, package = 'g3vizModified')
 }
 
 #' @rdname g3Lollipop-shiny
@@ -186,3 +235,5 @@ renderG3Lollipop <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
   shinyRenderWidget(expr, g3LollipopOutput, env, quoted = TRUE)
 }
+
+# shinyRenderWidget and shinyWidgetOutput are part of htmlwidgets::

@@ -25,6 +25,8 @@ parseProteinChange <- function(protein.change.vec, mutation.class.vec) {
     d.pc <- protein.change.vec[idx]
     d.mc <- mutation.class.vec[idx]
 
+    #Try adding the start position of the gene to the protein change number that gets extracted. 
+
     if(!(is.na(d.mc) || d.mc == "Other" || d.mc == "")){
       # extract the first numeric value
       aa.pos.vec[idx] = as.numeric(str_extract_all(d.pc, "[0-9]+")[[1]])[1]

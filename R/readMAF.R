@@ -7,6 +7,8 @@
 #'  extension.
 #'@param gene.symbol.col Column name of Hugo gene symbols (e.g., TP53). Default
 #'  \emph{Hugo_Symbol}.
+#'@param start.pos.col Column name of SNP start positions (e.g., 7). Default
+#'  \emph{Chromosome}.
 #'@param variant.class.col Column name for variant class information (e.g.,
 #'  \emph{Missense_Mutation}, \emph{Nonsense_Mutation}). Default is the first
 #'  match of \emph{Variant_Classification} or \emph{Mutation_Type}.
@@ -18,6 +20,8 @@
 #'@param if.parse.mutation.class if parse mutation class from mutation type
 #'  (variant classification) information. Default is \code{TRUE}.
 #'@param mutation.class.col Column name of the parsed mutation class. Default
+#'  \emph{Mutation_Class}.
+#'@param chr.col Column name of the chromosome number. Default
 #'  \emph{Mutation_Class}.
 #'@param aa.pos.col Column name of the parsed amino-acid change position.
 #'  Default \emph{AA_Position}.
@@ -43,6 +47,8 @@ readMAF <- function(maf.file,
                     if.parse.mutation.class = TRUE,
                     mutation.class.col = "Mutation_Class",
                     aa.pos.col = "AA_Position",
+                    start.pos.col = "Start_Position",
+                    chr.col = "Chromosome",
                     mutation.type.to.class.df = NA,
                     sep = "\t",
                     quote = "",
@@ -90,6 +96,8 @@ readMAF <- function(maf.file,
                                                                    mutation.type.to.class.df)
   }
 
+
+
   # ============================
   # parse amino-acid position
   if(if.parse.aa.pos){
@@ -97,8 +105,12 @@ readMAF <- function(maf.file,
                                                maf.df[, mutation.class.col])
 
     # sort according to amino-acid position
+
+    # [, aa.pos.col] -- this is subsetting the data before ordering it. 
     maf.df <- maf.df[order(maf.df[, aa.pos.col], maf.df[, gene.symbol.col], maf.df[, protein.change.col], decreasing = FALSE), ]
   }
+
+  maf.df <- maf.df[order(maf.df[, start.pos.col], maf.df[, gene.symbol.col], maf.df[, protein.change.col], decreasing = FALSE), ]
 
   maf.df
 }

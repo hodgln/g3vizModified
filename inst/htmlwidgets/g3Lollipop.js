@@ -4,7 +4,6 @@ HTMLWidgets.widget({
   factory: function (el) {
     return {
       renderValue: function (x) {
-        //console.log(x);
         //console.log("root id = ", el.id);
 
         // root div
@@ -66,6 +65,9 @@ HTMLWidgets.widget({
 
         lollipop.data.snvData = x.snvData;
         lollipop.data.domainData = x.domainData;
+        lollipop.data.transcriptData = x.transcriptData;
+        lollipop.data.genePosition = x.genePosition;
+        lollipop.data.geneSymbol = x.geneSymbol;
         lollipop.format.snvData = x.snvDataFormat;
         lollipop.format.domainData = x.domainDataFormat;
         lollipop.setOptions(x.plotSettings);
